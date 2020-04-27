@@ -11,7 +11,7 @@
   <body>
     <div class="player-grid">
       <div class="player player-grid__elem">
-        <video id="video-1" class="player__video" controls muted autoplay></video>
+        <video id="video-1" class="player__video" muted autoplay></video>
         <canvas class="analyser" width="256" height="64"></canvas>
         <div class="player__controls">
           <label class="control">
@@ -21,12 +21,16 @@
           <label class="control">
             Контрастность
             <input type="range" name="contrast" value="1" min="0.1" max="3" step="0.01" />
+          </label>
+          <label class="control">
+            Mute
+            <input type="checkbox" name="mute" checked />
           </label>
           <button class="close-button">X</button>
         </div>
       </div>
       <div class="player player-grid__elem">
-        <video id="video-2" class="player__video" controls muted autoplay></video>
+        <video id="video-2" class="player__video" muted autoplay></video>
         <canvas class="analyser" width="256" height="64"></canvas>
         <div class="player__controls">
           <label class="control">
@@ -36,12 +40,16 @@
           <label class="control">
             Контрастность
             <input type="range" name="contrast" value="1" min="0.1" max="3" step="0.01" />
+          </label>
+          <label class="control">
+            Mute
+            <input type="checkbox" name="mute" checked />
           </label>
           <button class="close-button">X</button>
         </div>
       </div>
       <div class="player player-grid__elem">
-        <video id="video-3" class="player__video" controls muted autoplay></video>
+        <video id="video-3" class="player__video" muted autoplay></video>
         <canvas class="analyser" width="256" height="64"></canvas>
         <div class="player__controls">
           <label class="control">
@@ -51,12 +59,16 @@
           <label class="control">
             Контрастность
             <input type="range" name="contrast" value="1" min="0.1" max="3" step="0.01" />
+          </label>
+          <label class="control">
+            Mute
+            <input type="checkbox" name="mute" checked />
           </label>
           <button class="close-button">X</button>
         </div>
       </div>
       <div class="player player-grid__elem">
-        <video id="video-4" class="player__video" controls muted autoplay></video>
+        <video id="video-4" class="player__video" muted autoplay></video>
         <canvas class="analyser" width="256" height="64"></canvas>
         <div class="player__controls">
           <label class="control">
@@ -66,6 +78,10 @@
           <label class="control">
             Контрастность
             <input type="range" name="contrast" value="1" min="0.1" max="3" step="0.01" />
+          </label>
+          <label class="control">
+            Mute
+            <input type="checkbox" name="mute" checked />
           </label>
           <button class="close-button">X</button>
         </div>
@@ -108,6 +124,7 @@
         }
 
         draw();
+        return audioCtx;
       }
 
       const playerGrid = document.querySelector(".player-grid");
@@ -117,19 +134,32 @@
         const playerVideo = player.querySelector(".player__video");
         const playerBrightness = player.querySelector("[name=brightness]");
         const playerContrast = player.querySelector("[name=contrast]");
+        const playerMute = player.querySelector("[name=mute]");
         const playerAnalyser = player.querySelector(".analyser");
+        let audioCtx;
 
+        // connect analyser to videos
         playerVideo.addEventListener(
           "canplay",
-          (e) => connectAnalyser(playerVideo, playerAnalyser),
+          (e) => {
+            audioCtx = connectAnalyser(playerVideo, playerAnalyser);
+          },
           { once: true }
         );
 
-        playerVideo.addEventListener("volumechange", (event) => {
-          if (!playerVideo.muted) playerAnalyser.classList.add("analyser_active");
-          else playerAnalyser.classList.remove("analyser_active");
+        playerMute.addEventListener("change", (e) => {
+          const muted = e.target.checked;
+
+          playerVideo.muted = e.target.checked;
+          if (!muted) {
+            playerAnalyser.classList.add("analyser_active");
+            audioCtx.resume();
+          } else {
+            playerAnalyser.classList.remove("analyser_active");
+          }
         });
 
+        // fullscreen video handler
         player.addEventListener("click", (e) => {
           if (e.target.nodeName !== "VIDEO" || player.classList.contains("player_fullscreen"))
             return;
@@ -139,7 +169,6 @@
         });
 
         playerCloseButton.addEventListener("click", (e) => {
-          console.log("closeButton click", playerCloseButton, player);
           player.classList.remove("player_fullscreen");
           playerGrid.classList.remove("player-grid_fullscreen");
         });
@@ -155,6 +184,7 @@
         };
 
         showPlayerFilterValues();
+        // filter inputs handlers
         playerBrightness.addEventListener("input", showPlayerFilterValues);
         playerContrast.addEventListener("input", showPlayerFilterValues);
         playerBrightness.addEventListener("change", setPlayerFilter);
