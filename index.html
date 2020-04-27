@@ -11,51 +11,101 @@
   <body>
     <div class="player-grid">
       <div class="player player-grid__elem">
-        <video id="video-1" class="player__video" muted autoplay></video>
+        <video id="video-1" class="player__video" controls muted autoplay></video>
         <div class="player__controls">
-          <label for="mute">
-            Mute
-            <input type="checkbox" name="mute" id="mute" />
+          <label class="control">
+            Яркость
+            <input type="range" name="brightness" value="1" min="0.1" max="2" step="0.01" />
           </label>
+          <label class="control">
+            Контрастность
+            <input type="range" name="contrast" value="1" min="0.1" max="3" step="0.01" />
+          </label>
+          <button class="close-button">X</button>
         </div>
       </div>
       <div class="player player-grid__elem">
-        <video id="video-2" class="player__video" muted autoplay></video>
+        <video id="video-2" class="player__video" controls muted autoplay></video>
         <div class="player__controls">
-          <label for="mute">
-            Mute
-            <input type="checkbox" name="mute" id="mute" />
+          <label class="control">
+            Яркость
+            <input type="range" name="brightness" value="1" min="0.1" max="2" step="0.01" />
           </label>
+          <label class="control">
+            Контрастность
+            <input type="range" name="contrast" value="1" min="0.1" max="3" step="0.01" />
+          </label>
+          <button class="close-button">X</button>
         </div>
       </div>
       <div class="player player-grid__elem">
-        <video id="video-3" class="player__video" muted autoplay></video>
+        <video id="video-3" class="player__video" controls muted autoplay></video>
         <div class="player__controls">
-          <label for="mute">
-            Mute
-            <input type="checkbox" name="mute" id="mute" />
+          <label class="control">
+            Яркость
+            <input type="range" name="brightness" value="1" min="0.1" max="2" step="0.01" />
           </label>
+          <label class="control">
+            Контрастность
+            <input type="range" name="contrast" value="1" min="0.1" max="3" step="0.01" />
+          </label>
+          <button class="close-button">X</button>
         </div>
       </div>
       <div class="player player-grid__elem">
-        <video id="video-4" class="player__video" muted autoplay></video>
+        <video id="video-4" class="player__video" controls muted autoplay></video>
         <div class="player__controls">
-          <label for="mute">
-            Mute
-            <input type="checkbox" name="mute" id="mute" />
+          <label class="control">
+            Яркость
+            <input type="range" name="brightness" value="1" min="0.1" max="2" step="0.01" />
           </label>
+          <label class="control">
+            Контрастность
+            <input type="range" name="contrast" value="1" min="0.1" max="3" step="0.01" />
+          </label>
+          <button class="close-button">X</button>
         </div>
       </div>
     </div>
     <script>
       const playerGrid = document.querySelector(".player-grid");
-      document.body.addEventListener("click", (e) => {
-        const target = e.target;
-        if (target.classList.contains("player__video")) {
-          const videoWrapper = target.closest(".player");
-          if (videoWrapper) videoWrapper.classList.toggle("player_fullscreen");
-          if (playerGrid) playerGrid.classList.toggle("player-grid_fullscreen");
-        }
+      const players = Array.from(document.querySelectorAll(".player"));
+      players.forEach((player) => {
+        const playerCloseButton = player.querySelector(".close-button");
+
+        player.addEventListener("click", (e) => {
+          if (e.target.nodeName !== "VIDEO" || player.classList.contains("player_fullscreen"))
+            return;
+          e.preventDefault();
+          player.classList.add("player_fullscreen");
+          playerGrid.classList.add("player-grid_fullscreen");
+        });
+
+        playerCloseButton.addEventListener("click", (e) => {
+          console.log("closeButton click", playerCloseButton, player);
+          player.classList.remove("player_fullscreen");
+          playerGrid.classList.remove("player-grid_fullscreen");
+        });
+
+        const playerVideo = player.querySelector(".player__video");
+        const playerBrightness = player.querySelector("[name=brightness]");
+        const playerContrast = player.querySelector("[name=contrast]");
+
+        const showPlayerFilterValues = () => {
+          playerBrightness.parentElement.dataset.value = playerBrightness.value;
+          playerContrast.parentElement.dataset.value = playerContrast.value;
+        };
+        const setPlayerFilter = () => {
+          const brightness = playerBrightness.value;
+          const contrast = playerContrast.value;
+          playerVideo.style.filter = `brightness(${brightness}) contrast(${contrast})`;
+        };
+
+        showPlayerFilterValues();
+        playerBrightness.addEventListener("input", showPlayerFilterValues);
+        playerContrast.addEventListener("input", showPlayerFilterValues);
+        playerBrightness.addEventListener("change", setPlayerFilter);
+        playerContrast.addEventListener("change", setPlayerFilter);
       });
     </script>
     <script>
