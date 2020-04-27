@@ -101,3 +101,15 @@ body {
   cursor: pointer;
   margin-left: auto;
 }
+
+.analyser {
+  display: none;
+  position: absolute;
+  top: 30px;
+  right: 0;
+  background-color: #000;
+}
+
+.player_fullscreen .analyser_active {
+  display: block;
+}

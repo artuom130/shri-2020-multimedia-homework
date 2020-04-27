@@ -12,6 +12,7 @@
     <div class="player-grid">
       <div class="player player-grid__elem">
         <video id="video-1" class="player__video" controls muted autoplay></video>
+        <canvas class="analyser" width="256" height="64"></canvas>
         <div class="player__controls">
           <label class="control">
             Яркость
@@ -26,6 +27,7 @@
       </div>
       <div class="player player-grid__elem">
         <video id="video-2" class="player__video" controls muted autoplay></video>
+        <canvas class="analyser" width="256" height="64"></canvas>
         <div class="player__controls">
           <label class="control">
             Яркость
@@ -40,6 +42,7 @@
       </div>
       <div class="player player-grid__elem">
         <video id="video-3" class="player__video" controls muted autoplay></video>
+        <canvas class="analyser" width="256" height="64"></canvas>
         <div class="player__controls">
           <label class="control">
             Яркость
@@ -54,6 +57,7 @@
       </div>
       <div class="player player-grid__elem">
         <video id="video-4" class="player__video" controls muted autoplay></video>
+        <canvas class="analyser" width="256" height="64"></canvas>
         <div class="player__controls">
           <label class="control">
             Яркость
@@ -68,10 +72,63 @@
       </div>
     </div>
     <script>
+      function connectAnalyser(video, canvas) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+        const analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 128;
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+
+        const source = audioCtx.createMediaElementSource(video);
+
+        source.connect(analyser).connect(audioCtx.destination);
+
+        const canvasCtx = canvas.getContext("2d");
+        const WIDTH = canvas.width;
+        const HEIGHT = canvas.height;
+        function draw() {
+          requestAnimationFrame(draw);
+          analyser.getByteTimeDomainData(dataArray);
+
+          canvasCtx.fillStyle = "rgb(0, 0, 0)";
+          canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
+
+          let barWidth = (WIDTH / bufferLength) * 2.5;
+          let barHeight;
+          let x = 0;
+          for (let i = 0; i < bufferLength; i++) {
+            barHeight = dataArray[i] / 2;
+
+            canvasCtx.fillStyle = "rgb(" + (barHeight + 100) + ",50,50)";
+            canvasCtx.fillRect(x, HEIGHT - barHeight / 2, barWidth, barHeight);
+
+            x += barWidth + 1;
+          }
+        }
+
+        draw();
+      }
+
       const playerGrid = document.querySelector(".player-grid");
       const players = Array.from(document.querySelectorAll(".player"));
       players.forEach((player) => {
         const playerCloseButton = player.querySelector(".close-button");
+        const playerVideo = player.querySelector(".player__video");
+        const playerBrightness = player.querySelector("[name=brightness]");
+        const playerContrast = player.querySelector("[name=contrast]");
+        const playerAnalyser = player.querySelector(".analyser");
+
+        playerVideo.addEventListener(
+          "canplay",
+          (e) => connectAnalyser(playerVideo, playerAnalyser),
+          { once: true }
+        );
+
+        playerVideo.addEventListener("volumechange", (event) => {
+          if (!playerVideo.muted) playerAnalyser.classList.add("analyser_active");
+          else playerAnalyser.classList.remove("analyser_active");
+        });
 
         player.addEventListener("click", (e) => {
           if (e.target.nodeName !== "VIDEO" || player.classList.contains("player_fullscreen"))
@@ -86,10 +143,6 @@
           player.classList.remove("player_fullscreen");
           playerGrid.classList.remove("player-grid_fullscreen");
         });
-
-        const playerVideo = player.querySelector(".player__video");
-        const playerBrightness = player.querySelector("[name=brightness]");
-        const playerContrast = player.querySelector("[name=contrast]");
 
         const showPlayerFilterValues = () => {
           playerBrightness.parentElement.dataset.value = playerBrightness.value;
