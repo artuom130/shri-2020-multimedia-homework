@@ -1,47 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Test streams</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="initVideo.js"></script>
-    <style>
-        .video {
-            width: 300px;
-            height: 200px;
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="player-grid">
+      <div class="player player-grid__elem">
+        <video id="video-1" class="player__video" muted autoplay></video>
+        <div class="player__controls">
+          <label for="mute">
+            Mute
+            <input type="checkbox" name="mute" id="mute" />
+          </label>
+        </div>
+      </div>
+      <div class="player player-grid__elem">
+        <video id="video-2" class="player__video" muted autoplay></video>
+        <div class="player__controls">
+          <label for="mute">
+            Mute
+            <input type="checkbox" name="mute" id="mute" />
+          </label>
+        </div>
+      </div>
+      <div class="player player-grid__elem">
+        <video id="video-3" class="player__video" muted autoplay></video>
+        <div class="player__controls">
+          <label for="mute">
+            Mute
+            <input type="checkbox" name="mute" id="mute" />
+          </label>
+        </div>
+      </div>
+      <div class="player player-grid__elem">
+        <video id="video-4" class="player__video" muted autoplay></video>
+        <div class="player__controls">
+          <label for="mute">
+            Mute
+            <input type="checkbox" name="mute" id="mute" />
+          </label>
+        </div>
+      </div>
+    </div>
+    <script>
+      const playerGrid = document.querySelector(".player-grid");
+      document.body.addEventListener("click", (e) => {
+        const target = e.target;
+        if (target.classList.contains("player__video")) {
+          const videoWrapper = target.closest(".player");
+          if (videoWrapper) videoWrapper.classList.toggle("player_fullscreen");
+          if (playerGrid) playerGrid.classList.toggle("player-grid_fullscreen");
         }
-    </style>
-</head>
-<body>
+      });
+    </script>
+    <script>
+      const origin = window.location.origin.replace(/:\d+/, "");
+      const decodedOrigin = decodeURIComponent(origin);
+      const getStreamUrl = (name, type = "master") =>
+        `${origin}:9191/${type}?url=${decodedOrigin}%3A3102%2Fstreams%2F${name}%2Fmaster.m3u8`;
 
-<video id="video-1" class="video" controls muted autoplay></video>
-<video id="video-2" class="video" controls muted autoplay></video>
-<br>
-<video id="video-3" class="video" controls muted autoplay></video>
-<video id="video-4" class="video" controls muted autoplay></video>
-<script>
-    initVideo(
-        document.getElementById('video-1'),
-        'http://localhost:9191/master?url=http%3A%2F%2Flocalhost%3A3102%2Fstreams%2Fsosed%2Fmaster.m3u8'
-    );
+      initVideo(document.getElementById("video-1"), getStreamUrl("sosed"));
 
-    initVideo(
-        document.getElementById('video-2'),
-        'http://localhost:9191/live?url=http%3A%2F%2Flocalhost%3A3102%2Fstreams%2Fstairs%2Fmaster.m3u8'
-    );
+      initVideo(document.getElementById("video-2"), getStreamUrl("stairs", "live"));
 
-    initVideo(
-        document.getElementById('video-3'),
-        'http://localhost:9191/master?url=http%3A%2F%2Flocalhost%3A3102%2Fstreams%2Fdog%2Fmaster.m3u8'
-    );
+      initVideo(document.getElementById("video-3"), getStreamUrl("dog"));
 
-    initVideo(
-        document.getElementById('video-4'),
-        'http://localhost:9191/live?url=http%3A%2F%2Flocalhost%3A3102%2Fstreams%2Fstreet%2Fmaster.m3u8'
-    );
-
-</script>
-
-
-</body>
+      initVideo(document.getElementById("video-4"), getStreamUrl("street", "live"));
+    </script>
+  </body>
 </html>
